@@ -61,44 +61,61 @@ var requestHandler = function(request, response) {
     //Detect the request type (POST, GET, etc..)
     //Perform a certain action for each one
 
-
-    var statusCode = 200;
-    var headers = defaultCorsHeaders;
-    headers['Content-Type'] = 'text/plain';
-    response.writeHead(statusCode, headers);
-    var responseBody = {
-
-      headers: response.headers,
-      method: request.method,
-      url: request.url,
-      results: fakeData
-    };
-
     if (request.method.toUpperCase() === 'GET') {
+
+      var statusCode = 200;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'text/plain';
+      response.writeHead(statusCode, headers);
+      var responseBody = {
+
+        headers: response.headers,
+        method: request.method,
+        url: request.url,
+        results: fakeData
+      };
 
       response.end(JSON.stringify(responseBody));
 
     } else if (request.method.toUpperCase() === 'POST') {
+
+      console.log("WE'RE HERE!!!");
+      var statusCode = 201;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'text/plain';
+      response.writeHead(statusCode, headers);
+      var responseBody = {
+        headers: response.headers,
+        method: request.method,
+        url: request.url,
+        results: fakeData,
+        // statusCode: statusCode
+      };
       
-      console.log(Object.keys(request.complete));
-      console.log(request.body);
-      fakeData.push(request.data);
+      // var body = '';
+      // request.on('data', function(chunk) {
+      //   body += chunk;
+      // }).on('end', function() {
+      //   console.log(body);
+      // });
+
+      // fakeData.push(JSON.parse(body));
       response.end(JSON.stringify(responseBody));
-
-      var body = '';
-      request.on('data', function(chunk) {
-        body += chunk;
-      }).on('end', function() {
-        console.log(body);
-      });
-
-      console.log(body);
-
-
     
     } else if (request.method.toUpperCase() === 'OPTIONS') {
-    
-      response.writeHead('204', 'No Content', headers);
+
+      var statusCode = 204;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'text/plain';
+      response.writeHead(statusCode, headers);
+      var responseBody = {
+
+        headers: response.headers,
+        method: request.method,
+        url: request.url,
+        results: fakeData
+      };    
+      response.writeHead(statusCode, 'No Content', headers);
       response.end();
     
     }
