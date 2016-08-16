@@ -19,44 +19,49 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+var ids = {};
+
+var randomIdGenerator = function() {
+  var bool = true;
+  while (bool) {
+    var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+    if (!ids[randomColor]) {
+      bool = false;
+      ids[randomColor] = true;
+    }
+  }
+  return randomColor;
+};
+
 var chatData = [
     {text: 'blah blah blah',
      username: 'calvin',
      roomname: 'lobby',
-     createdAt: new Date()},
+     createdAt: new Date(),
+     objectId: randomIdGenerator() },
 
     {text: 'blegh blegh blegh',
      username: 'hobbes',
      roomname: 'lobby',
-     createdAt: new Date()},
+     createdAt: new Date(),
+     objectId: randomIdGenerator() },
 
     {text: 'blargh blargh blargh',
      username: 'suzy',
      roomname: 'lobby',
-     createdAt: new Date()},
+     createdAt: new Date(),
+     objectId: randomIdGenerator() },
 
     {text: 'bwahahaha',
      username: 'calvin',
      roomname: '4chan',
-     createdAt: new Date()},
+     createdAt: new Date(),
+     objectId: randomIdGenerator() }
+
 ];
 
 
 var requestHandler = function(request, response) {
-  // Request and Response come from node's http module.
-  //
-  // They include information about both the incoming request, such as
-  // headers and URL, and about the outgoing response, such as its status
-  // and content.
-  //
-  // Documentation for both request and response can be found in the HTTP section at
-  // http://nodejs.org/documentation/api/
-
-  // Do some basic logging.
-  //
-  // Adding more logging to your server can be an easy way to get passive
-  // debugging help, but you should always be careful about leaving stray
-  // console.logs in your code.
   
 
 
@@ -82,12 +87,6 @@ var requestHandler = function(request, response) {
   };
 
   if (request.url === '/classes/messages') {
-    //Proceed with the request
-
-
-    //Detect the request type (POST, GET, etc..)
-    //Perform a certain action for each one
-
 
     if (request.method.toUpperCase() === 'GET') {
 
@@ -95,13 +94,13 @@ var requestHandler = function(request, response) {
 
     } else if (request.method.toUpperCase() === 'POST') {
 
-      //debugger;
       var body = '';
       request.on('data', function(chunk) {
         body += chunk;
       }).on('end', function() {
         body = JSON.parse(body);
         body.createdAt = new Date();
+        body.objectId = randomIdGenerator();
         chatData.unshift(body);
       });
       
@@ -119,6 +118,24 @@ var requestHandler = function(request, response) {
 
     //Give a message, there's no data here!
   }
+};
+
+exports.requestHandler = requestHandler;
+
+  // Request and Response come from node's http module.
+  //
+  // They include information about both the incoming request, such as
+  // headers and URL, and about the outgoing response, such as its status
+  // and content.
+  //
+  // Documentation for both request and response can be found in the HTTP section at
+  // http://nodejs.org/documentation/api/
+
+  // Do some basic logging.
+  //
+  // Adding more logging to your server can be an easy way to get passive
+  // debugging help, but you should always be careful about leaving stray
+  // console.logs in your code.
 
   // The outgoing status.
   // var statusCode = 200;
@@ -144,7 +161,6 @@ var requestHandler = function(request, response) {
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
   // response.end('Hello, World!');
-};
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
@@ -155,5 +171,3 @@ var requestHandler = function(request, response) {
 //
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
-
-exports.requestHandler = requestHandler;
