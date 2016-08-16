@@ -20,7 +20,11 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-var ids = {};
+var ids = {'442007': true,
+           '442008': true,
+           '442009': true,
+           '442010': true
+          };
 
 var randomIdGenerator = function() {
   var bool = true;
@@ -34,32 +38,7 @@ var randomIdGenerator = function() {
   return randomColor;
 };
 
-var chatData = [
-    {text: 'blah blah blah',
-     username: 'calvin',
-     roomname: 'lobby',
-     createdAt: new Date(),
-     objectId: randomIdGenerator() },
-
-    {text: 'blegh blegh blegh',
-     username: 'hobbes',
-     roomname: 'lobby',
-     createdAt: new Date(),
-     objectId: randomIdGenerator() },
-
-    {text: 'blargh blargh blargh',
-     username: 'suzy',
-     roomname: 'lobby',
-     createdAt: new Date(),
-     objectId: randomIdGenerator() },
-
-    {text: 'bwahahaha',
-     username: 'calvin',
-     roomname: '4chan',
-     createdAt: new Date(),
-     objectId: randomIdGenerator() }
-
-];
+var chatData;
 
 
 var requestHandler = function(request, response) {
@@ -87,7 +66,6 @@ var requestHandler = function(request, response) {
     
   };
 
-
   var match;
 
   if (request.url === '/') {
@@ -95,6 +73,8 @@ var requestHandler = function(request, response) {
     var data = fs.readFileSync('./client/index.html');
     response.writeHead(200, {'Content-Type': 'text/html'});
     response.write(data);
+    var chats = fs.readFileSync('./server/chats.txt');
+    chatData = JSON.parse(chats);
     response.end();
   }
   if (request.url === '/styles/styles.css') {
