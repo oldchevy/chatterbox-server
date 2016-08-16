@@ -11,6 +11,7 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var fs = require('fs');
 
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
@@ -86,7 +87,45 @@ var requestHandler = function(request, response) {
     
   };
 
+
   var match;
+
+  if (request.url === '/') {
+    console.log('Serving HTML!');
+    var data = fs.readFileSync('./client/index.html');
+    response.writeHead(200, {'Content-Type': 'text/html'});
+    response.write(data);
+    response.end();
+  }
+  if (request.url === '/styles/styles.css') {
+    console.log('Serving css!');
+    var data = fs.readFileSync('./client/styles/styles.css');
+    response.writeHead(200, {'Content-Type': 'text/css'});
+    response.write(data);
+    response.end();
+  }
+  if (request.url === '/bower_components/jquery/dist/jquery.js') {
+    console.log('Serving HTML!');
+    var data = fs.readFileSync('./client/bower_components/jquery/dist/jquery.js');
+    response.writeHead(200, {'Content-Type': 'text/javascript'});
+    response.write(data);
+    response.end();
+  }
+  if (request.url === '/bower_components/moment/moment.js') {
+    console.log('Serving HTML!');
+    var data = fs.readFileSync('./client/bower_components/moment/moment.js');
+    response.writeHead(200, {'Content-Type': 'text/javascript'});
+    response.write(data);
+    response.end();
+  }
+  if (request.url === '/scripts/app.js') {
+    console.log('Serving HTML!');
+    var data = fs.readFileSync('./client/scripts/app.js');
+    response.writeHead(200, {'Content-Type': 'text/javascript'});
+    response.write(data);
+    response.end();
+  }
+
 
   if (request.url === '/classes/messages') {
 
