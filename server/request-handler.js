@@ -19,6 +19,26 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+var fakeData = [
+    {text: 'blah blah blah',
+     username: 'calvin',
+     roomname: 'lobby',
+     createdAt: new Date()},
+    {text: 'blegh blegh blegh',
+     username: 'hobbes',
+     roomname: 'lobby',
+     createdAt: new Date()},
+    {text: 'blargh blargh blargh',
+     username: 'suzy',
+     roomname: 'lobby',
+   createdAt: new Date()},
+    {text: 'bwahahaha',
+     username: 'calvin',
+     roomname: '4chan',
+     createdAt: new Date()},
+];
+
+
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -35,20 +55,6 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   
-  fakeData = [
-    {text: "blah blah blah",
-     username: "calvin",
-     roomname: "lobby"},
-    {text: "blegh blegh blegh",
-     username: "hobbes",
-     roomname: "lobby"},
-    {text: "blargh blargh blargh",
-     username: "suzy",
-     roomname: "lobby"},
-    {text: "bwahahaha",
-     username: "calvin",
-     roomname: "4chan"}
-  ];
 
 
   console.log('Serving request type ' + request.method + ' for url ' + request.url + ', headers:' + request.headers);
@@ -73,13 +79,24 @@ var requestHandler = function(request, response) {
         method: request.method,
         url: request.url,
         results: fakeData
+
       };
 
       response.end(JSON.stringify(responseBody));
 
     } else if (request.method.toUpperCase() === 'POST') {
 
-      console.log("WE'RE HERE!!!");
+      //debugger;
+      var body = '';
+      request.on('data', function(chunk) {
+        body += chunk;
+        console.log('Chunking!!!! :', chunk);
+      }).on('end', function() {
+        body = JSON.parse(body);
+        body.createdAt = new Date();
+        fakeData.unshift(body);
+      });
+
       var statusCode = 201;
       var headers = defaultCorsHeaders;
       headers['Content-Type'] = 'text/plain';
@@ -89,17 +106,8 @@ var requestHandler = function(request, response) {
         method: request.method,
         url: request.url,
         results: fakeData,
-        // statusCode: statusCode
       };
       
-      // var body = '';
-      // request.on('data', function(chunk) {
-      //   body += chunk;
-      // }).on('end', function() {
-      //   console.log(body);
-      // });
-
-      // fakeData.push(JSON.parse(body));
       response.end(JSON.stringify(responseBody));
     
     } else if (request.method.toUpperCase() === 'OPTIONS') {
@@ -124,6 +132,9 @@ var requestHandler = function(request, response) {
     var statusCode = 404;
     var headers = defaultCorsHeaders;
     headers['Content-Type'] = 'text/plain';
+    response.writeHead(statusCode, 'No Content', headers);
+    response.end();
+
     //Give a message, there's no data here!
   }
 
@@ -163,4 +174,4 @@ var requestHandler = function(request, response) {
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
 
-module.exports = requestHandler;
+exports.requestHandler = requestHandler;
