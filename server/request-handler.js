@@ -19,19 +19,22 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-var fakeData = [
+var chatData = [
     {text: 'blah blah blah',
      username: 'calvin',
      roomname: 'lobby',
      createdAt: new Date()},
+
     {text: 'blegh blegh blegh',
      username: 'hobbes',
      roomname: 'lobby',
      createdAt: new Date()},
+
     {text: 'blargh blargh blargh',
      username: 'suzy',
      roomname: 'lobby',
-   createdAt: new Date()},
+     createdAt: new Date()},
+
     {text: 'bwahahaha',
      username: 'calvin',
      roomname: '4chan',
@@ -60,6 +63,24 @@ var requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url + ', headers:' + request.headers);
 
 
+  var makeResponse = function(statusCode) {
+    var headers = defaultCorsHeaders;
+    headers['Content-Type'] = 'text/plain';
+    response.writeHead(statusCode, headers);
+    var responseBody = {
+
+      headers: response.headers,
+      method: request.method,
+      url: request.url,
+      results: chatData
+
+    };
+    if (statusCode !== 404) {
+      return responseBody;
+    } 
+    
+  };
+
   if (request.url === '/classes/messages') {
     //Proceed with the request
 
@@ -67,22 +88,10 @@ var requestHandler = function(request, response) {
     //Detect the request type (POST, GET, etc..)
     //Perform a certain action for each one
 
+
     if (request.method.toUpperCase() === 'GET') {
 
-      var statusCode = 200;
-      var headers = defaultCorsHeaders;
-      headers['Content-Type'] = 'text/plain';
-      response.writeHead(statusCode, headers);
-      var responseBody = {
-
-        headers: response.headers,
-        method: request.method,
-        url: request.url,
-        results: fakeData
-
-      };
-
-      response.end(JSON.stringify(responseBody));
+      response.end(JSON.stringify(makeResponse(200)));
 
     } else if (request.method.toUpperCase() === 'POST') {
 
@@ -90,49 +99,22 @@ var requestHandler = function(request, response) {
       var body = '';
       request.on('data', function(chunk) {
         body += chunk;
-        console.log('Chunking!!!! :', chunk);
       }).on('end', function() {
         body = JSON.parse(body);
         body.createdAt = new Date();
-        fakeData.unshift(body);
+        chatData.unshift(body);
       });
-
-      var statusCode = 201;
-      var headers = defaultCorsHeaders;
-      headers['Content-Type'] = 'text/plain';
-      response.writeHead(statusCode, headers);
-      var responseBody = {
-        headers: response.headers,
-        method: request.method,
-        url: request.url,
-        results: fakeData,
-      };
       
-      response.end(JSON.stringify(responseBody));
+      response.end(JSON.stringify(makeResponse(201)));
     
     } else if (request.method.toUpperCase() === 'OPTIONS') {
-
-      var statusCode = 204;
-      var headers = defaultCorsHeaders;
-      headers['Content-Type'] = 'text/plain';
-      response.writeHead(statusCode, headers);
-      var responseBody = {
-
-        headers: response.headers,
-        method: request.method,
-        url: request.url,
-        results: fakeData
-      };    
-      response.writeHead(statusCode, 'No Content', headers);
+      makeResponse(204);
       response.end();
     
     }
 
   } else {
-    var statusCode = 404;
-    var headers = defaultCorsHeaders;
-    headers['Content-Type'] = 'text/plain';
-    response.writeHead(statusCode, 'No Content', headers);
+    makeResponse(404);
     response.end();
 
     //Give a message, there's no data here!
