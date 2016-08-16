@@ -12,6 +12,13 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+var defaultCorsHeaders = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'access-control-allow-headers': 'content-type, accept',
+  'access-control-max-age': 10 // Seconds.
+};
+
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -27,23 +34,97 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  
+  fakeData = [
+    {text: "blah blah blah",
+     username: "calvin",
+     roomname: "lobby"},
+    {text: "blegh blegh blegh",
+     username: "hobbes",
+     roomname: "lobby"},
+    {text: "blargh blargh blargh",
+     username: "suzy",
+     roomname: "lobby"},
+    {text: "bwahahaha",
+     username: "calvin",
+     roomname: "4chan"}
+  ];
+
+
+  console.log('Serving request type ' + request.method + ' for url ' + request.url + ', headers:' + request.headers);
+
+
+  if (request.url === '/classes/messages') {
+    //Proceed with the request
+
+
+    //Detect the request type (POST, GET, etc..)
+    //Perform a certain action for each one
+
+
+    var statusCode = 200;
+    var headers = defaultCorsHeaders;
+    headers['Content-Type'] = 'text/plain';
+    response.writeHead(statusCode, headers);
+    var responseBody = {
+
+      headers: response.headers,
+      method: request.method,
+      url: request.url,
+      results: fakeData
+    };
+
+    if (request.method.toUpperCase() === 'GET') {
+
+      response.end(JSON.stringify(responseBody));
+
+    } else if (request.method.toUpperCase() === 'POST') {
+      
+      console.log(Object.keys(request.complete));
+      console.log(request.body);
+      fakeData.push(request.data);
+      response.end(JSON.stringify(responseBody));
+
+      var body = '';
+      request.on('data', function(chunk) {
+        body += chunk;
+      }).on('end', function() {
+        console.log(body);
+      });
+
+      console.log(body);
+
+
+    
+    } else if (request.method.toUpperCase() === 'OPTIONS') {
+    
+      response.writeHead('204', 'No Content', headers);
+      response.end();
+    
+    }
+
+  } else {
+    var statusCode = 404;
+    var headers = defaultCorsHeaders;
+    headers['Content-Type'] = 'text/plain';
+    //Give a message, there's no data here!
+  }
 
   // The outgoing status.
-  var statusCode = 200;
+  // var statusCode = 200;
 
   // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
+  // var headers = defaultCorsHeaders;
 
   // Tell the client we are sending them plain text.
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  // headers['Content-Type'] = 'text/plain';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  // response.writeHead(statusCode, headers);
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -52,7 +133,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  // response.end('Hello, World!');
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -64,10 +145,5 @@ var requestHandler = function(request, response) {
 //
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
-};
 
+module.exports = requestHandler;
