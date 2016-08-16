@@ -73,5 +73,43 @@ describe('server', function() {
     });
   });
 
+  it('should have a unique ID for each message', function(done) {
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Jono',
+        message: 'Do my bidding!'}
+    };
+
+    var requestParamsZwei = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Hans',
+        message: 'Guten Tag JA'}
+    };
+
+    request(requestParamsZwei);
+
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        expect(messages[0].objectId).to.not.equal(messages[1].objectId);
+        done();
+      });
+    });
+  });
+
+
+  it('should send back only messages for a room when url is /classes/rooms/roomName', function(done) {
+    request('http://127.0.0.1:3000/classes/rooms/lobby', function(error, response, body) {
+      var messages = JSON.parse(body).results;
+      console.log(messages);
+      messages.forEach(function(msg) {
+        expect(msg.roomname).to.equal('lobby');
+      });
+      done();
+    });
+  });
 
 });

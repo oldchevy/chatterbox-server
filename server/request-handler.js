@@ -86,6 +86,8 @@ var requestHandler = function(request, response) {
     
   };
 
+  var match;
+
   if (request.url === '/classes/messages') {
 
     if (request.method.toUpperCase() === 'GET') {
@@ -109,7 +111,20 @@ var requestHandler = function(request, response) {
     } else if (request.method.toUpperCase() === 'OPTIONS') {
       makeResponse(204);
       response.end();
-    
+    }
+
+  } else if (match = request.url.match(/\/classes\/rooms\/(.*)/)) {
+
+    if (request.method.toUpperCase() === 'GET') {
+
+      var body = makeResponse(200);
+      body.results = chatData.filter(function(messageObj) {
+        return messageObj.roomname === match[1];
+      });
+      response.end(JSON.stringify(body));
+    } else {
+      makeResponse(404);
+      response.end();
     }
 
   } else {
