@@ -4,7 +4,7 @@ var handler = require('./request-handler.js');
 var fs = require('fs');
 
 
-
+console.log(handler);
 // Every server needs to listen on a port with a unique number. The
 // standard port for HTTP servers is port 80, but that port is
 // normally already claimed by another server and/or not accessible
@@ -25,11 +25,37 @@ var ip = '127.0.0.1';
 // incoming requests.
 //
 // After creating the server, we will tell it to listen on the given port and IP. */
-console.log(handler.requestHandler);
 var server = http.createServer(handler.requestHandler);
 console.log('Listening on http://' + ip + ':' + port);
+
 server.listen(port, ip);
 
+
+var cleanup = function() {
+  console.log('Cleaning');
+  console.log(handler.chats);
+  fs.writeFileSync('./server/chats.txt', JSON.stringify(handler.chats()));
+};
+
+process.on('cleanup', cleanup);
+
+process.on('exit', function() {
+  this.emit('cleanup');
+});
+
+process.on('SIGINT', function() {
+  console.log('  Ctrl-C...');
+  this.exit(2);
+});
+
+process.on('uncaughtException', function(e) {
+  console.log('Uncaught Exception... \n', e.stack);
+  this.exit(99);
+});
+
+
+//Testing process exiting
+//setTimeout(function() { process.exit(3); }, 3000);
 // To start this server, run:
 //
 //   node basic-server.js
